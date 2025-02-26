@@ -1,3 +1,88 @@
 # Network Analysis Experimentation
 
+## 27th Feb 2025
 
+The toy dataset structure:
+
+**nodes**
+
+- id
+- lat
+- lon
+- type: either age_care or hospital
+- size
+
+**edges**
+
+- from
+- to
+- timestamp
+- reason: chest pain, breathing issue, injury, stroke, seizures, and high fever (from ChatGPT)
+
+
+```{r}
+#| results: false
+# Loading the dataset
+load(here::here("data/data/sim_network.RData"))
+```
+
+```{r}
+head(edges)
+head(nodes)
+```
+
+### Trying geomnet package
+
+The data structure for the `geomnet` package combines two sources of information, node description and the relationship between nodes (vertices), into one dataset using the fortify methods. The supported classes are "network" from `sna` and `network` packages, "igraph" from the `igraph` package, "adjmat", and "edgedf" (classes from `geomnet`).
+
+The `as.edgedf()` only works with data.frame object.
+
+```{r}
+#| message: false
+library(dplyr)
+edges <- edges |>
+    mutate(from = factor(from, levels = seq(1:20)),
+            to = factor(to, levels = seq(1:20)))
+nodes <- nodes |>
+    mutate(id = factor(id, levels = seq(1:20)))
+
+edges_data <- as.data.frame(edges)
+nodes_data <- as.data.frame(nodes)
+```
+
+Combining the edges and nodes
+
+```{r}
+#| message: false
+library(geomnet)
+
+network_data <- fortify(as.edgedf(edges_data), nodes_data)
+head(network_data)
+```
+
+```{r}
+#| eval: false
+set.seed(1)
+library(ggplot2)
+
+ggplot(data = network_data, 
+        aes(from_id = from_id, to_id = to_id)) +
+    geom_net()
+```
+
+There is a problem in the geom_net function where it said, "The first two columns of `x` must be of the same type." It also happens with the provided code in the `geomnet` package. Still not sure why.
+
+https://rdrr.io/github/statnet/network/src/R/dataframe.R
+
+
+### Trying tidygraph and ggraph packages
+
+I will have to look further into this.
+
+```{r}
+#| eval: false
+library(ggraph)
+library(tidygraph)
+```
+
+https://www.data-imaginist.com/posts/2024-02-15-ggraph-2-2-0/

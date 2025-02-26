@@ -14,7 +14,7 @@
     "href": "literature-review.html",
     "title": "2  Literature Review",
     "section": "",
-    "text": "2.1 Graphical discovery in stochastic actor-oriented models for social network analysis - Chapter 4\nMany R packages can manipulate network objects. However, they mainly focused on analysing network data and not necessarily on rendering visualisations of networks. Visualising network data using packages such as igraph, sna, and network requires a lot of extra work if one is accustomed to working with a data structure like vectors, data frames, or arrays. This chapter provides three different approaches to network visualisation through ggplot2 wrappers. The first is a function, ggnet2, from the ggally package that acts as a wrapper around a network object to create ggplot2 graph. The second package, geomnet, combines all network pieces (nodes, edges, and labels) into a single geom and is intended to look the most like other ggplot2 geoms in use. The final package, ggnetwork, performs some data manipulation and aliases other geoms to layer the different network aspects one on top of the other. Each of these approaches also has different ways of dealing with the data structure.",
+    "text": "2.1 Graphical discovery in stochastic actor-oriented models for social network analysis - Chapter 4\nMany R packages can manipulate network objects. However, they mainly focused on analysing network data and not necessarily on rendering visualisations of networks. Visualising network data using packages such as igraph, sna, and network requires much extra work if one is used to working with a data structure like vectors, data frames, or arrays. This chapter provides three different approaches to network visualisation through ggplot2 wrappers. The first is a function, ggnet2, from the ggally package that acts as a wrapper around a network object to create a ggplot2 graph. The second package, geomnet, combines all network pieces (nodes, edges, and labels) into a single geom and is intended to look the most like other ggplot2 geoms in use. The final package, ggnetwork, performs some data manipulation and aliases other geoms to layer the different network aspects on top of the other. Each of these packages also has different ways of dealing with the data structure.\nFor geomnet, it combines two sources of information, node description and the relationship between nodes (vertices), into one dataset using the fortify s3 methods. The supported classes are “network” from sna and network packages, “igraph” from the igraph package, “adjmat”, and “edgedf” (classes from geomnet). It is then passed on to the ggplot2 to draw the network data. On the other hand, ggnet2 and ggnetwork internally translate a network object into a data frame suitable for plotting with ggplot2, then apply network-related aesthetic operations to that data frame.",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Literature Review</span>"
     ]
@@ -27,6 +27,26 @@
     "text": "2.2 Hospital Transfer Network Structure as a Risk Factor for Clostridium defficile Infection",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Literature Review</span>"
+    ]
+  },
+  {
+    "objectID": "network-experiment.html",
+    "href": "network-experiment.html",
+    "title": "1  Network Analysis Experimentation",
+    "section": "",
+    "text": "1.1 27th Feb 2025\nload(here::here(\"data/data/sim_network.RData\"))\nhead(edges)\n\n  from to           timestamp          reason\n1   16  9 2025-01-21 12:00:00      high_fever\n2    1 12 2025-01-29 02:00:00        seizures\n3   13  8 2025-02-10 05:00:00 breathing_issue\n4    6  4 2025-01-19 11:00:00      high_fever\n5    7  1 2025-01-28 04:00:00          injury\n6   19 20 2025-01-11 06:00:00      chest_pain\n\nhead(nodes)\n\n  id       lat      lon     type size\n1  1 -37.24499 145.1787 age_care  451\n2  2 -37.74283 145.1580 hospital  337\n3  3 -37.44000 145.1742 hospital  473\n4  4 -37.80249 145.1468 hospital  119\n5  5 -37.70488 145.1440 hospital  147\n6  6 -37.62297 145.1749 hospital  456",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Network Analysis Experimentation</span>"
+    ]
+  },
+  {
+    "objectID": "network-experiment.html#th-feb-2025",
+    "href": "network-experiment.html#th-feb-2025",
+    "title": "1  Network Analysis Experimentation",
+    "section": "",
+    "text": "1.1.1 Trying geomnet package\nThe data stucture for geomnet package is combining two sources of information; nodes description and relationship between nodes (vertices) into one dataset. It is done using the fortify methods. The supported classes are “network” from sna and network packages, “igraph” from the igraph package, “adjmat”, and “edgedf” (classes from geomnet).\nThe as.edgedf() only work with data.frame object.\n\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nedges &lt;- edges |&gt;\n    mutate(from = factor(from, levels = seq(1:20)),\n            to = factor(to, levels = seq(1:20)))\nnodes &lt;- nodes |&gt;\n    mutate(id = factor(id, levels = seq(1:20)))\n\nedges_data &lt;- as.data.frame(edges)\nnodes_data &lt;- as.data.frame(nodes)\n\nCombining the edges and nodes\n\nlibrary(ggplot2)\nlibrary(geomnet)\n\n\nnetwork_data &lt;- fortify(as.edgedf(edges_data), nodes_data)\n\nUsing from as the from node column and to as the to node column.\nIf this is not correct, rewrite dat so that the first 2 columns are from and to node, respectively.\n\n\nJoining edge and node information by from_id and id respectively.\n\nhead(network_data)\n\n  from_id to_id           timestamp          reason       lat      lon     type\n1       1    14 2025-02-05 05:00:00 breathing_issue -37.24499 145.1787 age_care\n2       1    17 2025-01-07 16:00:00      high_fever -37.24499 145.1787 age_care\n3       1    12 2025-01-29 02:00:00        seizures -37.24499 145.1787 age_care\n4       1     9 2025-01-11 19:00:00          stroke -37.24499 145.1787 age_care\n5       1    14 2025-02-08 21:00:00      high_fever -37.24499 145.1787 age_care\n6       1    16 2025-01-14 07:00:00      high_fever -37.24499 145.1787 age_care\n  size\n1  451\n2  451\n3  451\n4  451\n5  451\n6  451\n\n\n\nset.seed(1)\n\nggplot(data = network_data, aes(from_id = from_id, to_id = to_id)) +\n    geom_net()\n\nhttps://rdrr.io/github/statnet/network/src/R/dataframe.R\n\n\n1.1.2 Trying tidygraph and ggraph packages\nI will have to look further for this.\n\nlibrary(ggraph)\nlibrary(tidygraph)\n\nhttps://www.data-imaginist.com/posts/2024-02-15-ggraph-2-2-0/",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Network Analysis Experimentation</span>"
     ]
   }
 ]

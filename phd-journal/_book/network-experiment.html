@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -129,8 +163,18 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#th-feb-2025" id="toc-th-feb-2025" class="nav-link active" data-scroll-target="#th-feb-2025"><span class="header-section-number">1.1</span> 27th Feb 2025</a>
+  <ul class="collapse">
+  <li><a href="#trying-geomnet-package" id="toc-trying-geomnet-package" class="nav-link" data-scroll-target="#trying-geomnet-package"><span class="header-section-number">1.1.1</span> Trying geomnet package</a></li>
+  <li><a href="#trying-tidygraph-and-ggraph-packages" id="toc-trying-tidygraph-and-ggraph-packages" class="nav-link" data-scroll-target="#trying-tidygraph-and-ggraph-packages"><span class="header-section-number">1.1.2</span> Trying tidygraph and ggraph packages</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -154,8 +198,114 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="th-feb-2025" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="th-feb-2025"><span class="header-section-number">1.1</span> 27th Feb 2025</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data/data/sim_network.RData"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(edges)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  from to           timestamp          reason
+1   16  9 2025-01-21 12:00:00      high_fever
+2    1 12 2025-01-29 02:00:00        seizures
+3   13  8 2025-02-10 05:00:00 breathing_issue
+4    6  4 2025-01-19 11:00:00      high_fever
+5    7  1 2025-01-28 04:00:00          injury
+6   19 20 2025-01-11 06:00:00      chest_pain</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(nodes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id       lat      lon     type size
+1  1 -37.24499 145.1787 age_care  451
+2  2 -37.74283 145.1580 hospital  337
+3  3 -37.44000 145.1742 hospital  473
+4  4 -37.80249 145.1468 hospital  119
+5  5 -37.70488 145.1440 hospital  147
+6  6 -37.62297 145.1749 hospital  456</code></pre>
+</div>
+</div>
+<section id="trying-geomnet-package" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="trying-geomnet-package"><span class="header-section-number">1.1.1</span> Trying geomnet package</h3>
+<p>The data stucture for <code>geomnet</code> package is combining two sources of information; nodes description and relationship between nodes (vertices) into one dataset. It is done using the fortify methods. The supported classes are “network” from <code>sna</code> and <code>network</code> packages, “igraph” from the <code>igraph</code> package, “adjmat”, and “edgedf” (classes from <code>geomnet</code>).</p>
+<p>The <code>as.edgedf()</code> only work with data.frame object.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>edges <span class="ot">&lt;-</span> edges <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">from =</span> <span class="fu">factor</span>(from, <span class="at">levels =</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">to =</span> <span class="fu">factor</span>(to, <span class="at">levels =</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>nodes <span class="ot">&lt;-</span> nodes <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">id =</span> <span class="fu">factor</span>(id, <span class="at">levels =</span> <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>edges_data <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(edges)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>nodes_data <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(nodes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Combining the edges and nodes</p>
+<div class="cell" data-messages="false">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geomnet)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-messages="false">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>network_data <span class="ot">&lt;-</span> <span class="fu">fortify</span>(<span class="fu">as.edgedf</span>(edges_data), nodes_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Using from as the from node column and to as the to node column.
+If this is not correct, rewrite dat so that the first 2 columns are from and to node, respectively.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining edge and node information by from_id and id respectively.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(network_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  from_id to_id           timestamp          reason       lat      lon     type
+1       1    14 2025-02-05 05:00:00 breathing_issue -37.24499 145.1787 age_care
+2       1    17 2025-01-07 16:00:00      high_fever -37.24499 145.1787 age_care
+3       1    12 2025-01-29 02:00:00        seizures -37.24499 145.1787 age_care
+4       1     9 2025-01-11 19:00:00          stroke -37.24499 145.1787 age_care
+5       1    14 2025-02-08 21:00:00      high_fever -37.24499 145.1787 age_care
+6       1    16 2025-01-14 07:00:00      high_fever -37.24499 145.1787 age_care
+  size
+1  451
+2  451
+3  451
+4  451
+5  451
+6  451</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> network_data, <span class="fu">aes</span>(<span class="at">from_id =</span> from_id, <span class="at">to_id =</span> to_id)) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_net</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>https://rdrr.io/github/statnet/network/src/R/dataframe.R</p>
+</section>
+<section id="trying-tidygraph-and-ggraph-packages" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="trying-tidygraph-and-ggraph-packages"><span class="header-section-number">1.1.2</span> Trying tidygraph and ggraph packages</h3>
+<p>I will have to look further for this.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggraph)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidygraph)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>https://www.data-imaginist.com/posts/2024-02-15-ggraph-2-2-0/</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
