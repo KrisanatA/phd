@@ -1,0 +1,21 @@
+project:
+  type: book
+
+book:
+  title: "PhD Meeting Notes"
+  author: "Krisanat Anukarnsakulchularp"
+  chapters:
+    - index.qmd
+    - network-experiment.qmd
+    - literature-review.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: minty
+  pdf:
+    documentclass: scrreprt
+
+
+
