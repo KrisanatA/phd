@@ -54,6 +54,7 @@ Combining the edges and nodes
 
 ```{r}
 #| message: false
+#| output: false
 library(geomnet)
 
 network_data <- fortify(as.edgedf(edges_data), nodes_data)
@@ -62,6 +63,7 @@ head(network_data)
 
 ```{r}
 #| eval: false
+# Not working
 set.seed(1)
 library(ggplot2)
 
