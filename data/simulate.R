@@ -21,8 +21,8 @@ timestamp <- seq(as.POSIXct("2025-01-01 00:00:00"),
                 by = "hour")
 reason <- c("chest_pain", "breathing_issue", "injury", "stroke", "seizures", "high_fever")
 
-edges <- tibble(from = sample(seq(1, n_edge, 1), replace = TRUE),
-                to = sample(seq(1, n_edge, 1), replace = TRUE),
+edges <- tibble(from = sample(seq(1, n_node, 1), size = n_edge, replace = TRUE),
+                to = sample(seq(1, n_node, 1), size = n_edge, replace = TRUE),
                 timestamp = sample(timestamp, size = n_edge, replace = TRUE),
                 reason = sample(reason, size = n_edge, replace = TRUE)) |>
         filter(from != to)
