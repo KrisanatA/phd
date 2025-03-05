@@ -77,14 +77,48 @@ There is a problem in the geom_net function where it said, "The first two column
 https://rdrr.io/github/statnet/network/src/R/dataframe.R
 
 
-### Trying tidygraph and ggraph packages
+## 6th Mar 2025
 
-I will have to look further into this.
+### tidygraph
+
+The `tidygraph` provides a tidy API for graph manipulation. The network data can be seen as two tidy tables, one for node data and one for edge data. This package provides a way to switch between the two tables and provides dplyr verbs for manipulating the data. A lot of graph algorithms in `igraph` is also accessible through this package.
 
 ```{r}
-#| eval: false
-library(ggraph)
 library(tidygraph)
+
+tidygraph_structure <- tbl_graph(nodes, edges)
 ```
 
-https://www.data-imaginist.com/posts/2024-02-15-ggraph-2-2-0/
+#### Example
+
+Change the size to a thousand. It is somewhat similar to `cubble` where I must activate the table I want to manipulate.
+
+```{r}
+tidygraph_structure |>
+    activate(nodes) |>
+    mutate(size = size/1000) |>
+    activate(edges) |>
+    mutate(reason = toupper(reason))
+```
+
+
+### sfnetworks
+
+The `sfnetworks` allow us to extend the graph into the domain of geospatial data analysis, where each observation has a location in geographical space. The `sf` package is the driving force for this package. It is one of the common packages used when working with geospatial data.
+
+```{r}
+library(sf)
+library(sfnetworks)
+
+nodes_sf <- st_as_sf(nodes, coords = c("lat", "lon"))
+
+sfnetwork_obj <- sfnetwork(nodes_sf, edges)
+```
+
+#### My first network plot
+
+```{r}
+library(ggplot2)
+
+autoplot(sfnetwork_obj)
+```
