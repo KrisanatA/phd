@@ -27,4 +27,4 @@ edges <- tibble(from = sample(seq(1, n_node, 1), size = n_edge, replace = TRUE),
                 reason = sample(reason, size = n_edge, replace = TRUE)) |>
         filter(from != to)
 
-save(nodes, edges, file = "data/sim_network.RData")
+save(nodes, edges, file = "data/toy/sim_network.RData")
