@@ -1,5 +1,20 @@
 # Network Analysis Experimentation
 
+```{r}
+#| echo: false
+#| output: false
+
+# library
+library(dplyr)
+library(geomnet)
+library(ggplot2)
+library(tidygraph)
+library(sf)
+library(sfnetworks)
+library(ggraph)
+```
+
+
 ## 27th Feb 2025
 
 The toy dataset structure:
@@ -22,8 +37,8 @@ The toy dataset structure:
 
 ```{r}
 #| results: false
-# Loading the dataset
-load(here::here("data/data/sim_network.RData"))
+# loading the dataset
+load(here::here("data/toy/sim_network.RData"))
 ```
 
 ```{r}
@@ -39,7 +54,6 @@ The `as.edgedf()` only works with data.frame object.
 
 ```{r}
 #| message: false
-library(dplyr)
 edges <- edges |>
     mutate(from = factor(from, levels = seq(1:20)),
             to = factor(to, levels = seq(1:20)))
@@ -55,18 +69,15 @@ Combining the edges and nodes
 ```{r}
 #| message: false
 #| output: false
-library(geomnet)
-
 network_data <- fortify(as.edgedf(edges_data), nodes_data)
 head(network_data)
 ```
 
+`geomnet` package is not working.
+
 ```{r}
 #| eval: false
 # Not working
-set.seed(1)
-library(ggplot2)
-
 ggplot(data = network_data, 
         aes(from_id = from_id, to_id = to_id)) +
     geom_net()
@@ -84,8 +95,6 @@ https://rdrr.io/github/statnet/network/src/R/dataframe.R
 The `tidygraph` provides a tidy API for graph manipulation. The network data can be seen as two tidy tables, one for node data and one for edge data. This package provides a way to switch between the two tables and provides dplyr verbs for manipulating the data. A lot of graph algorithms in `igraph` is also accessible through this package.
 
 ```{r}
-library(tidygraph)
-
 tidygraph_structure <- tbl_graph(nodes, edges)
 ```
 
@@ -101,15 +110,11 @@ tidygraph_structure |>
     mutate(reason = toupper(reason))
 ```
 
-
 ### sfnetworks
 
 The `sfnetworks` allow us to extend the graph into the domain of geospatial data analysis, where each observation has a location in geographical space. The `sf` package is the driving force for this package. It is one of the common packages used when working with geospatial data.
 
 ```{r}
-library(sf)
-library(sfnetworks)
-
 nodes_sf <- st_as_sf(nodes, coords = c("lat", "lon"))
 
 sfnetwork_obj <- sfnetwork(nodes_sf, edges)
@@ -118,7 +123,124 @@ sfnetwork_obj <- sfnetwork(nodes_sf, edges)
 #### My first network plot
 
 ```{r}
-library(ggplot2)
-
 autoplot(sfnetwork_obj)
 ```
+
+
+## 13th Mar 2025
+
+### geospatial
+
+It is the two `sf` objects, one describing the node and one describing the edge data. With the geospatial objects, there are many ways to specify the layouts in the `ggraph`.
+
+```{r}
+# loading caribou data
+load(here::here("data/caribou/caribou.RData"))
+```
+
+```{r}
+head(locations)
+head(individuals)
+```
+
+Trying one individual caribou.
+
+```{r}
+# for multiple caribous
+keep <- individuals |> 
+  filter(!is.na(death_cause)) |> 
+  pull(animal_id)
+
+# KE_car027
+ke_car027 <- locations |> 
+  filter(animal_id == "KE_car027") |> 
+  mutate(event_id = as.character(event_id)) |> 
+  arrange(animal_id, timestamp)
+```
+
+Apparently, if the id column is double when joining the data using `sfnetwork`, R crashes. Since the event_id is "2282779430" storing it as double is too large. (this took me a long time to figure out)
+
+```{r}
+nodes <- ke_car027 |> 
+  select(event_id, latitude, longitude, season) |> 
+  rename(id = event_id)
+
+edges <- ke_car027 |> 
+  select(event_id, timestamp) |> 
+  mutate(to = lead(event_id)) |> 
+  rename(from = event_id) |> 
+  filter(!is.na(to))
+```
+
+Converting the nodes to the `sf` object.
+
+```{r}
+nodes_sf <- st_as_sf(nodes, coords = c("latitude", "longitude"), crs = st_crs(4326))
+
+# combining nodes and edges
+caribou_path <- sfnetwork(nodes_sf, edges)
+```
+
+
+### Draw a plot using ggraph
+
+The geospatial layout in the ggraph can be specified both as a function or data frame object.
+
+```{r}
+# function way
+layout_sf <- function(graph) {
+  graph <- activate(graph, nodes)
+  x <- sf::st_coordinates(graph)[, "X"]
+  y <- sf::st_coordinates(graph)[, "Y"]
+  data.frame(x, y)
+}
+
+# data frame way
+x <- sf::st_coordinates(caribou_path)[, "X"]
+y <- sf::st_coordinates(caribou_path)[, "Y"]
+layout <- data.frame(x, y)
+```
+
+The layout argument can be switched between the function and data frame.
+
+```{r}
+ggraph(caribou_path, layout = layout_sf) +
+  geom_node_point(size = 0.5) +
+  geom_edge_link(arrow = arrow(length = unit(0.1, "inches")))
+```
+
+Using the `sf` layout.
+
+```{r}
+ggraph(caribou_path, layout = 'sf') +
+  geom_node_sf() +
+  geom_edge_link()
+```
+
+Not sure about the warning (need to look further). Intuitively, I should be able to overlay this onto the map.
+
+```{r}
+# getting world map
+world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
+
+ggraph(caribou_path, 'sf') +
+  geom_sf(data = world) +
+  geom_node_sf() +
+  geom_edge_link()
+
+ggraph(caribou_path, 'sf') +
+  geom_polygon(data = map_data("world"), mapping = aes(x = long, y = lat, group = group)) +
+  geom_node_sf() +
+  geom_edge_link()
+
+```
+
+There is a problem with the ggraph where its coordinates do not match with the sf. I will need to figure this out.
+
+Next step:
+
+1. Find why the ggraph and map do not match
+2. Need to try linestring geometry. Maybe that is the problem
+
+
+
