@@ -156,16 +156,31 @@ ke_car027 <- locations |>
   filter(animal_id == "KE_car027") |> 
   mutate(event_id = as.character(event_id)) |> 
   arrange(animal_id, timestamp)
+
+multiple_car <- locations |> 
+  filter(animal_id %in% keep) |> 
+  mutate(event_id = as.character(event_id)) |> 
+  arrange(animal_id, timestamp)
 ```
 
 Apparently, if the id column is double when joining the data using `sfnetwork`, R crashes. Since the event_id is "2282779430" storing it as double is too large. (this took me a long time to figure out)
 
 ```{r}
-nodes <- ke_car027 |> 
+nodes <- multiple_car |> 
   select(event_id, latitude, longitude, season) |> 
   rename(id = event_id)
 
-edges <- ke_car027 |> 
+edges <- multiple_car |> 
+  select(event_id, timestamp) |> 
+  mutate(to = lead(event_id)) |> 
+  rename(from = event_id) |> 
+  filter(!is.na(to))
+
+nodes_ke <- ke_car027 |> 
+  select(event_id, latitude, longitude, season) |> 
+  rename(id = event_id)
+
+edges_ke <- ke_car027 |> 
   select(event_id, timestamp) |> 
   mutate(to = lead(event_id)) |> 
   rename(from = event_id) |> 
@@ -175,10 +190,14 @@ edges <- ke_car027 |>
 Converting the nodes to the `sf` object.
 
 ```{r}
-nodes_sf <- st_as_sf(nodes, coords = c("latitude", "longitude"), crs = st_crs(4326))
+nodes_sf <- st_as_sf(nodes, coords = c("longitude", "latitude"), crs = st_crs(4326))
 
 # combining nodes and edges
 caribou_path <- sfnetwork(nodes_sf, edges)
+
+nodes_ke_sf <- st_as_sf(nodes_ke, coords = c("longitude", "latitude"), crs = st_crs(4326))
+
+ke_path <- sfnetwork(nodes_ke_sf, edges_ke)
 ```
 
 
@@ -196,15 +215,15 @@ layout_sf <- function(graph) {
 }
 
 # data frame way
-x <- sf::st_coordinates(caribou_path)[, "X"]
-y <- sf::st_coordinates(caribou_path)[, "Y"]
+x <- sf::st_coordinates(ke_path)[, "X"]
+y <- sf::st_coordinates(ke_path)[, "Y"]
 layout <- data.frame(x, y)
 ```
 
 The layout argument can be switched between the function and data frame.
 
 ```{r}
-ggraph(caribou_path, layout = layout_sf) +
+ggraph(ke_path, layout = layout_sf) +
   geom_node_point(size = 0.5) +
   geom_edge_link(arrow = arrow(length = unit(0.1, "inches")))
 ```
@@ -212,7 +231,7 @@ ggraph(caribou_path, layout = layout_sf) +
 Using the `sf` layout.
 
 ```{r}
-ggraph(caribou_path, layout = 'sf') +
+ggraph(ke_path, layout = 'sf') +
   geom_node_sf() +
   geom_edge_link()
 ```
@@ -224,23 +243,25 @@ Not sure about the warning (need to look further). Intuitively, I should be able
 world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
 
 ggraph(caribou_path, 'sf') +
-  geom_sf(data = world) +
+  geom_sf(data = canadianmaps::CD) +
   geom_node_sf() +
-  geom_edge_link()
-
+  geom_edge_link() +
+  theme_grey() +
+  coord_sf(xlim = c(-125, -119), ylim = c(54, 56))
+  
 ggraph(caribou_path, 'sf') +
   geom_polygon(data = map_data("world"), mapping = aes(x = long, y = lat, group = group)) +
   geom_node_sf() +
-  geom_edge_link()
-
+  geom_edge_link() +
+  theme_grey()
 ```
 
-There is a problem with the ggraph where its coordinates do not match with the sf. I will need to figure this out.
+There is a problem with the ggraph where its coordinates do not match with the sf. I will need to figure this out. (It is fixed now.)
 
 Next step:
 
-1. Find why the ggraph and map do not match
-2. Need to try linestring geometry. Maybe that is the problem
+1. Need to try linestring geometry.
+2. Start doing an analysis on the caribou dataset.
 
 
 
