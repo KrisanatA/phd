@@ -1,0 +1,39 @@
+# Caribou Analysis
+
+```{r}
+#| message: false
+
+# library
+library(tidyverse)
+```
+
+```{r}
+# loading the data
+load(here::here("data/caribou/caribou.Rdata"))
+
+# data overview
+glimpse(individuals)
+glimpse(locations)
+
+visdat::vis_dat(individuals)
+visdat::vis_dat(locations, warn_large_data = FALSE)
+```
+
+The variable that does not contain NA in the individuals data are sex and study_site.
+
+```{r}
+# Joining the data
+caribou <- individuals |> 
+    select(animal_id, sex) |> 
+    distinct(animal_id, .keep_all = TRUE) |> 
+    right_join(locations, by = "animal_id") |> 
+    mutate(
+        sex = factor(sex, levels = c("f", "m"), labels = c("female", "male"))
+    )
+```
+
+
+## Question
+
+- Is there any different between the winter and summer movement?
+- Does caribou from different study site have the same movement pattern?

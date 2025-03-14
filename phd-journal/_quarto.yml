@@ -7,6 +7,7 @@ book:
   chapters:
     - index.qmd
     - network-experiment.qmd
+    - caribou-analysis.qmd    
     - literature-review.qmd
 
 bibliography: references.bib
