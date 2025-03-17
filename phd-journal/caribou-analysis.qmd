@@ -5,6 +5,8 @@
 
 # library
 library(tidyverse)
+library(sf)
+library(sfnetworks)
 ```
 
 ```{r}
@@ -28,8 +30,25 @@ caribou <- individuals |>
     distinct(animal_id, .keep_all = TRUE) |> 
     right_join(locations, by = "animal_id") |> 
     mutate(
-        sex = factor(sex, levels = c("f", "m"), labels = c("female", "male"))
+        sex = factor(sex, levels = c("f", "m"), labels = c("female", "male")),
+        event_id = as.character(event_id)
     )
+```
+
+```{r}
+nodes <- caribou |> 
+  select(event_id, latitude, longitude, animal_id, study_site, season, sex) |> 
+  rename(id = event_id)
+
+edges <- caribou |> 
+  select(event_id, timestamp, animal_id, season) |> 
+  mutate(to = lead(event_id)) |> 
+  rename(from = event_id) |> 
+  filter(!is.na(to))
+
+nodes_sf <- st_as_sf(nodes, coords = c("longitude", "latitude"), crs = st_crs(4326))
+
+caribou_graph <- sfnetwork(nodes_sf, edges)
 ```
 
 
@@ -40,3 +59,92 @@ caribou <- individuals |>
 - Individual variation: Analyze differences in movement patterns between individual caribou within the same herd.
 - Habitat preference: Identify areas where caribou spend more time versus areas they quickly pass through.
 - Human impact assessment: Explore how proximity to human infrastructure (roads, settlements) affects caribou movement.
+
+## Temporal migration patterns
+
+Distance?
+
+Movement pattern?
+
+More distance cover in summer than winter. The pattern is more spread out in summer.
+
+Now there are 3 dataset I have to keep tabs off
+
+```{r}
+locations |> 
+    count(animal_id, study_site, season) |> 
+    ggplot(aes(x = season, y = n)) +
+    geom_boxplot() +
+    facet_wrap(~study_site, scales = "free")
+```
+
+Generally, there seems to be more movement in the summer than winter, however, this also depends on the different between the number of records in winter and summer as well.
+
+```{r}
+# calculate the time gap
+time_gap <- locations |> 
+    arrange(event_id) |> 
+    group_by(animal_id) |> 
+    mutate(timestamp_1 = lead(timestamp)) |> 
+    filter(!is.na(timestamp_1)) |> 
+    mutate(
+        time_gap = interval(timestamp, timestamp_1),
+        years = time_gap %/% years(1),
+        months = time_gap %% years(1) %/% months(1),
+        days = time_gap %% years(1) %% months(1) %/% days(1),
+        hours = time_gap %% years(1) %% months(1) %% days(1) %/% hours(1),
+        minutes = time_gap %% years(1) %% months(1) %% days(1) %% hours(1) %/% minutes(1),
+        seconds = time_gap %% years(1) %% months(1) %% days(1) %% hours(1) %% minutes(1) %/% seconds(1)) |> 
+    ungroup()
+```
+
+```{r}
+# check the negative values
+time_gap |> 
+    filter(years < 0 | months < 0 | days < 0 | hours < 0 | minutes < 0)
+```
+
+Even when arrange by `event_id` there are still the negative time gap which could suggest that the `event_id` does not followed the time chronological order. The example of this is down below.
+
+```{r}
+locations |> 
+    filter(event_id %in% c(2259227782:2259227786))
+```
+
+The logical thing to do then arrange this base on the timestamp assume that the timestamp entry is correct.
+
+```{r}
+time_gap <- locations |> 
+    arrange(timestamp) |> 
+    group_by(animal_id) |> 
+    mutate(timestamp_1 = lead(timestamp)) |> 
+    filter(!is.na(timestamp_1)) |> 
+    mutate(
+        time_gap = interval(timestamp, timestamp_1),
+        years = time_gap %/% years(1),
+        months = time_gap %% years(1) %/% months(1),
+        days = time_gap %% years(1) %% months(1) %/% days(1),
+        hours = time_gap %% years(1) %% months(1) %% days(1) %/% hours(1),
+        minutes = time_gap %% years(1) %% months(1) %% days(1) %% hours(1) %/% minutes(1),
+        seconds = time_gap %% years(1) %% months(1) %% days(1) %% hours(1) %% minutes(1) %/% seconds(1)) |> 
+    ungroup()
+```
+
+```{r}
+# check the negative values
+time_gap |> 
+    filter(years < 0 | months < 0 | days < 0 | hours < 0)
+```
+
+```{r}
+time_gap |> 
+    group_by(animal_id, season) |> 
+    summarise(
+        years = sum(years),
+        months = sum(months),
+        days = sum(days),
+        hours = sum(hours),
+        minutes = sum(minutes),
+        nodes = n()
+    )
+```
