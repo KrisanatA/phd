@@ -35,5 +35,8 @@ caribou <- individuals |>
 
 ## Question
 
-- Is there any different between the winter and summer movement?
-- Does caribou from different study site have the same movement pattern?
+- Temporal migration patterns: Analyze how caribou movement changes throughout seasons and years.
+- Herd comparison: Compare movement patterns between different herds to identify similarities and differences in behavior.
+- Individual variation: Analyze differences in movement patterns between individual caribou within the same herd.
+- Habitat preference: Identify areas where caribou spend more time versus areas they quickly pass through.
+- Human impact assessment: Explore how proximity to human infrastructure (roads, settlements) affects caribou movement.
