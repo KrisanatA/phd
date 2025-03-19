@@ -7,6 +7,8 @@
 library(tidyverse)
 library(sf)
 library(sfnetworks)
+library(ggraph)
+library(ggmap)
 ```
 
 ```{r}
@@ -61,10 +63,6 @@ caribou_graph <- sfnetwork(nodes_sf, edges)
 - Human impact assessment: Explore how proximity to human infrastructure (roads, settlements) affects caribou movement.
 
 ## Temporal migration patterns
-
-Distance?
-
-Movement pattern?
 
 More distance cover in summer than winter. The pattern is more spread out in summer.
 
@@ -137,7 +135,8 @@ time_gap |>
 ```
 
 ```{r}
-time_gap |> 
+#| message: false
+summary_gap <- time_gap |> 
     group_by(animal_id, season) |> 
     summarise(
         years = sum(years),
@@ -147,4 +146,43 @@ time_gap |>
         minutes = sum(minutes),
         nodes = n()
     )
+
+summary_gap
 ```
+
+```{r}
+caribou_graph |> 
+    activate("nodes") |> 
+    filter(study_site == "Graham") |>
+    ggraph('sf') +
+    geom_sf(data = canadianmaps::CD) +
+    geom_node_sf(color = "red", alpha = 0.2) +
+    coord_sf(xlim = c(-125, -121), ylim = c(54, 58)) +
+    theme(aspect.ratio = 1) +
+    facet_wrap(~season)
+```
+
+```{r}
+graham <- readRDS(here::here("data/graham.rds"))
+
+ggmap(graham) +
+    geom_point(data = nodes |> filter(study_site == "Graham"), 
+    mapping = aes(x = longitude, y = latitude), alpha = 0.2, color = "red") +
+    facet_wrap(~season)
+```
+
+```{r}
+ggmap(graham) +
+    geom_point(data = nodes |> filter(study_site == "Graham"),
+        mapping = aes(x = longitude, y = latitude), alpha = 0.2, color = "red") +
+    geom_edge_link(data = caribou_graph |> activate(edges))
+```
+
+
+
+
+
+# What is not done
+
+- test linestring
+- going to pause this and work on the crosstalk
