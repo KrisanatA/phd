@@ -172,6 +172,7 @@ ggmap(graham) +
 ```
 
 ```{r}
+#| eval: false
 ggmap(graham) +
     geom_point(data = nodes |> filter(study_site == "Graham"),
         mapping = aes(x = longitude, y = latitude), alpha = 0.2, color = "red") +
@@ -179,10 +180,11 @@ ggmap(graham) +
 ```
 
 
+# Next
 
-
-
-# What is not done
-
-- test linestring
-- going to pause this and work on the crosstalk
+- Try tsibble
+- openstreet map tiles
+- deal with the time irregularities
+- cassowary (convex hull area)
+- catchment area
+- Think about movement feature
