@@ -176,6 +176,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#question" id="toc-question" class="nav-link active" data-scroll-target="#question"><span class="header-section-number">2.1</span> Question</a></li>
   <li><a href="#temporal-migration-patterns" id="toc-temporal-migration-patterns" class="nav-link" data-scroll-target="#temporal-migration-patterns"><span class="header-section-number">2.2</span> Temporal migration patterns</a></li>
+  <li><a href="#what-is-not-done" id="toc-what-is-not-done" class="nav-link" data-scroll-target="#what-is-not-done"><span class="header-section-number">3</span> What is not done</a></li>
   </ul>
 </nav>
     </div>
@@ -313,8 +314,6 @@ $ latitude   &lt;dbl&gt; 56.23950, 56.23985, 56.24000, 56.23187, 56.23402, 56.23
 </section>
 <section id="temporal-migration-patterns" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="temporal-migration-patterns"><span class="header-section-number">2.2</span> Temporal migration patterns</h2>
-<p>Distance?</p>
-<p>Movement pattern?</p>
 <p>More distance cover in summer than winter. The pattern is more spread out in summer.</p>
 <p>Now there are 3 dataset I have to keep tabs off</p>
 <div class="cell">
@@ -426,10 +425,25 @@ $ latitude   &lt;dbl&gt; 56.23950, 56.23985, 56.24000, 56.23187, 56.23402, 56.23
 <span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">hours =</span> <span class="fu">sum</span>(hours),</span>
 <span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">minutes =</span> <span class="fu">sum</span>(minutes),</span>
 <span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">nodes =</span> <span class="fu">n</span>()</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'animal_id'. You can override using the
-`.groups` argument.</code></pre>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>summary_gap</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 500 × 8
+# Groups:   animal_id [255]
+   animal_id season years months  days hours minutes nodes
+   &lt;chr&gt;     &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;
+ 1 BP_car022 Summer     0     10   819   425    1181    52
+ 2 BP_car022 Winter     0      7   447   542    1323    49
+ 3 BP_car023 Summer     0      1    98    44     145     6
+ 4 BP_car023 Winter     0      0    20    23       0     1
+ 5 BP_car032 Summer     0      0    48  4277    6491   238
+ 6 BP_car032 Winter     0      0     4  6024    9442   338
+ 7 BP_car043 Summer     0      2   241  2211    4298   142
+ 8 BP_car043 Winter     0      0    86  1505    2891    92
+ 9 BP_car100 Summer     0      0   122  5392   18057   634
+10 BP_car100 Winter     0      0    11  5485   19175   711
+# ℹ 490 more rows</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -442,6 +456,13 @@ $ latitude   &lt;dbl&gt; 56.23950, 56.23985, 56.24000, 56.23187, 56.23402, 56.23
 <span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_sf</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">125</span>, <span class="sc">-</span><span class="dv">121</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">54</span>, <span class="dv">58</span>)) <span class="sc">+</span></span>
 <span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
 <span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>season)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="caribou-analysis_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>graham <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data/graham.rds"</span>))</span>
@@ -458,6 +479,19 @@ $ latitude   &lt;dbl&gt; 56.23950, 56.23985, 56.24000, 56.23187, 56.23402, 56.23
 </div>
 </div>
 </div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggmap</span>(graham) <span class="sc">+</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">data =</span> nodes <span class="sc">|&gt;</span> <span class="fu">filter</span>(study_site <span class="sc">==</span> <span class="st">"Graham"</span>),</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> longitude, <span class="at">y =</span> latitude), <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_edge_link</span>(<span class="at">data =</span> caribou_graph <span class="sc">|&gt;</span> <span class="fu">activate</span>(edges))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="what-is-not-done" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> What is not done</h1>
+<ul>
+<li>test linestring</li>
+<li>going to pause this and work on the crosstalk</li>
+</ul>
 
 
 </section>
