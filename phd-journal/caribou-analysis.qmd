@@ -8,7 +8,10 @@ library(tidyverse)
 library(sf)
 library(sfnetworks)
 library(ggraph)
+library(ggplot2)
 library(ggmap)
+library(tsibble)
+library(cassowaryr)
 ```
 
 ```{r}
@@ -79,6 +82,7 @@ locations |>
 Generally, there seems to be more movement in the summer than winter, however, this also depends on the different between the number of records in winter and summer as well.
 
 ```{r}
+#| eval: false
 # calculate the time gap
 time_gap <- locations |> 
     arrange(event_id) |> 
@@ -86,7 +90,7 @@ time_gap <- locations |>
     mutate(timestamp_1 = lead(timestamp)) |> 
     filter(!is.na(timestamp_1)) |> 
     mutate(
-        time_gap = interval(timestamp, timestamp_1),
+        time_gap = lubridate::interval(timestamp, timestamp_1),
         years = time_gap %/% years(1),
         months = time_gap %% years(1) %/% months(1),
         days = time_gap %% years(1) %% months(1) %/% days(1),
@@ -97,6 +101,7 @@ time_gap <- locations |>
 ```
 
 ```{r}
+#| eval: false
 # check the negative values
 time_gap |> 
     filter(years < 0 | months < 0 | days < 0 | hours < 0 | minutes < 0)
@@ -112,13 +117,14 @@ locations |>
 The logical thing to do then arrange this base on the timestamp assume that the timestamp entry is correct.
 
 ```{r}
+#| eval: false
 time_gap <- locations |> 
     arrange(timestamp) |> 
     group_by(animal_id) |> 
     mutate(timestamp_1 = lead(timestamp)) |> 
     filter(!is.na(timestamp_1)) |> 
     mutate(
-        time_gap = interval(timestamp, timestamp_1),
+        time_gap = lubridate::interval(timestamp, timestamp_1),
         years = time_gap %/% years(1),
         months = time_gap %% years(1) %/% months(1),
         days = time_gap %% years(1) %% months(1) %/% days(1),
@@ -129,12 +135,14 @@ time_gap <- locations |>
 ```
 
 ```{r}
+#| eval: false
 # check the negative values
 time_gap |> 
     filter(years < 0 | months < 0 | days < 0 | hours < 0)
 ```
 
 ```{r}
+#| eval: false
 #| message: false
 summary_gap <- time_gap |> 
     group_by(animal_id, season) |> 
@@ -179,6 +187,82 @@ ggmap(graham) +
     geom_edge_link(data = caribou_graph |> activate(edges))
 ```
 
+
+## Time irregularities
+
+```{r}
+locations |> 
+    ggplot(aes(x = timestamp, y = animal_id)) +
+    geom_point() +
+    facet_wrap(~study_site,
+        scales = "free_y")
+```
+
+I want to visualise the time gap between the animal_id so that I could aggregate the irregularities in the time interval. The interesting point that I have not notice before is that there are actually two groups of caribou in the graham study site. One between 2001 to 2004 and 2008 to 2011, about 3 years period.
+
+```{r}
+calibou_graham <- locations |> 
+    filter(study_site == "Graham") |> 
+    mutate(group = ifelse(str_detect(animal_id, "GR_GC"), 2009, 2002))
+
+ggmap(graham) +
+    geom_point(data = calibou_graham, 
+    mapping = aes(x = longitude, y = latitude), alpha = 0.2, color = "red") +
+    facet_wrap(~season + group)
+```
+
+We now need to find the maximum time interval.
+
+```{r}
+calibou_gap <- calibou_graham |> 
+    group_by(group, animal_id) |> 
+    arrange(animal_id, timestamp) |> 
+    mutate(timestamp_1 = lead(timestamp)) |> 
+    filter(!is.na(timestamp_1)) |> 
+    mutate(time_gap = as.numeric(timestamp_1 - timestamp, units = "mins")) |> 
+    ungroup()
+
+calibou_gap |> 
+    ggplot(aes(x = time_gap)) +
+    geom_histogram(binwidth = 240) +
+    scale_x_continuous(limits = c(0, 10000))
+
+calibou_gap |> 
+    group_by(group) |> 
+    count(time_gap) |> 
+    arrange(-n)
+```
+
+GR_GC02 has the largest time gap at 214139 minutes. The most common time gap is 540 minutes for the 2009 group, while the most common time gap for the 2002 group is 240 minutes.
+
+```{r}
+#| eval: false
+tsib_calibou <- as_tsibble(calibou_graham, key = animal_id)
+
+tsib_calibou |> tsibble::count_gaps()
+```
+
+
+## Scagnostics
+
+```{r}
+#| eval: false
+calibou_graham |> 
+  select(longitude, latitude, group) |> 
+  mutate(longitude = as.integer(longitude * 10000),
+         latitude = as.integer(latitude * 10000)) |> 
+  filter(group == 2002) |> 
+  summarise(calc_scags(latitude, longitude, scags = c("outlying")))
+```
+
+```{r}
+calibou_graham_2002 <- calibou_graham |> 
+    filter(group == 2002)
+
+sc_sparse2(calibou_graham_2002$longitude, calibou_graham_2002$latitude)
+
+sc_convex(calibou_graham_2002$longitude, calibou_graham_2002$latitude)
+```
 
 # Next
 
